@@ -32,12 +32,8 @@ def update_file(file_path, database, start=None):
 
         audio['title'] = [database['songs'][db_id]['name']]
         audio['album'] = [database['album']]
-        artist_list = database['songs'][db_id]['artist'].split(";")
-        for i in range(len(artist_list)):
-            if artist_list[i] == "祖堅 正慶":
-                artist_list[i] = "祖堅正慶"
-
-        audio['artist'] = artist_list
+        database['songs'][db_id]['artist'] = database['songs'][db_id]['artist'].replace("祖堅 正慶", "祖堅正慶")
+        audio['artist'] = [database['songs'][db_id]['artist']]
         audio['date'] = [str(release.year)]
         audio.save()
 
