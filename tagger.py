@@ -21,12 +21,23 @@ def update_file(file_path, database, start=None):
 
     elif file_path[-5:] == '.flac':
         audio = FLAC(file_path)
-        track = int(audio['tracknumber'][0])
+        if 'tracknumber' in audio.tags:
+            track = int(audio['tracknumber'][0])
+        else:
+            track = int(file_path[0:2])
+            audio['tracknumber'] = [str(track)]
+
+
         db_id = str(track + start - 1)
 
         audio['title'] = [database['songs'][db_id]['name']]
         audio['album'] = [database['album']]
-        audio['artist'] = database['songs'][db_id]['artist'].split(";")
+        artist_list = database['songs'][db_id]['artist'].split(";")
+        for i in range(len(artist_list)):
+            if artist_list[i] == "祖堅 正慶":
+                artist_list[i] = "祖堅正慶"
+
+        audio['artist'] = artist_list
         audio['date'] = [str(release.year)]
         audio.save()
 
