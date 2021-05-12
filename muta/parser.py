@@ -92,4 +92,4 @@ class SmartParser:
 
     def parse(self, text):
         if self.parser:
-            return self.parser(text)
+            return self.parser.parse(text)
