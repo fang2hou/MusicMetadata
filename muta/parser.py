@@ -1,8 +1,9 @@
 import re
-from datetime import datetime
 from abc import ABCMeta, abstractmethod
+from datetime import datetime
 
 from bs4 import BeautifulSoup
+
 from muta.metadata import SongMetadata, AlbumMetadata
 
 
@@ -62,7 +63,10 @@ class AppleMusicParser(Parser):
 
         # Songs
         table_body = soup.select("div.songs-list")[0]
+        offset = 0
         for line in table_body.select("div.songs-list-row"):
+            if len(line.select('div.songs-list-row__song-index')) == 0:
+                continue
             song = SongMetadata()
             song.track_id = int(line.select('span.songs-list-row__column-data')[0].text.strip())
             song.name = line.select('div.songs-list-row__song-name')[0].text.strip()
@@ -76,7 +80,12 @@ class AppleMusicParser(Parser):
                 # Apple Music do not display artists if same with album artists
                 song.artist = album.album_artist
 
-            album.songs[song.track_id] = song
+            if song.track_id in album.songs:
+                if song.track_id == 1:
+                    offset = len(album.songs)
+                album.songs[offset + song.track_id] = song
+            else:
+                album.songs[song.track_id] = song
 
         return album
 
