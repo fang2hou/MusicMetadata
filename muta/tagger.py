@@ -92,14 +92,21 @@ class Tagger:
             else:
                 track = int(audio['tracknumber'][0])
         elif self.matching_method == MatchingMethod.TrackInName:
-            track = int(file_path[0:2])
+            track = int(file_path[0:2]) - self.start + 1
             audio['tracknumber'] = [str(track)]
         elif self.matching_method == MatchingMethod.Name:
-            file_name = file_path.split(" ")[-1].strip('.flac')
+            file_names = file_path.split(" ")
+
+            if len(file_names) > 1:
+                file_name = file_names[1]
+            else:
+                file_name = file_names[0]
+
+            file_name = file_name.split("-")[-1].strip('.flac').strip()
             track = 0
             for song_id in metadata.songs:
-                if file_name == metadata.songs[song_id].name:
-                    track = song_id
+                if file_name in metadata.songs[song_id].name:
+                    track = song_id - self.start + 1
                     audio['tracknumber'] = [str(track)]
                     break
             if track == 0:
@@ -121,6 +128,7 @@ class Tagger:
             new_name = "{:02d} {}.flac".format(track, metadata.songs[metadata_song_id].name)
             new_name = new_name.replace(": ", "：")
             new_name = new_name.replace(" / ", "／")
+            new_name = new_name.replace("/ ", "／")
             rename(file_path, new_name)
 
     def tag_file(self, file_path: str, metadata: AlbumMetadata):
