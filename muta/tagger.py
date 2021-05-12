@@ -1,5 +1,5 @@
-from os import walk, chdir, rename
 from enum import Enum
+from os import walk, chdir, rename
 
 from mutagen.flac import FLAC
 from mutagen.mp4 import MP4
@@ -93,14 +93,14 @@ class Tagger:
                 track = int(audio['tracknumber'][0])
         elif self.matching_method == MatchingMethod.TrackInName:
             track = int(file_path[0:2])
-            audio['tracknumber'] = [int(track)]
+            audio['tracknumber'] = [str(track)]
         elif self.matching_method == MatchingMethod.Name:
             file_name = file_path.split(" ")[-1].strip('.flac')
             track = 0
             for song_id in metadata.songs:
                 if file_name == metadata.songs[song_id].name:
                     track = song_id
-                    audio['tracknumber'] = [int(track)]
+                    audio['tracknumber'] = [str(track)]
                     break
             if track == 0:
                 raise ValueError
