@@ -50,7 +50,7 @@ class AppleMusicParser(Parser):
         artists = []
         for artist_link in line.select('a'):
             artists.append(artist_link.text)
-        return "; ".join(artists)
+        return ";".join(artists)
 
     def parse(self, text):
         soup = BeautifulSoup(text, "html.parser")
@@ -71,7 +71,10 @@ class AppleMusicParser(Parser):
             song.track_id = int(line.select('span.songs-list-row__column-data')[0].text.strip())
             song.name = line.select('div.songs-list-row__song-name')[0].text.strip()
 
-            length_list = line.select('div.songs-list-row__length')[0].text.strip().split(":")
+            song_length_text = line.select('div.songs-list-row__length')
+            if len(song_length_text) == 0:
+                continue
+            length_list = song_length_text[0].text.strip().split(":")
             song.length = int(length_list[0]) * 60 + int(length_list[1])
 
             if len(line.select('div.songs-list-row__by-line')) > 0:

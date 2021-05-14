@@ -90,9 +90,9 @@ class Tagger:
             if 'tracknumber' not in audio.tags:
                 raise ValueError
             else:
-                track = int(audio['tracknumber'][0])
+                track = int(audio['tracknumber'][0].split('/')[0])
         elif self.matching_method == MatchingMethod.TrackInName:
-            track = int(file_path[0:2]) - self.start + 1
+            track = int(file_path[0:2].strip('.')) - self.start + 1
             audio['tracknumber'] = [str(track)]
         elif self.matching_method == MatchingMethod.Name:
             file_names = file_path.split(" ")
@@ -117,9 +117,9 @@ class Tagger:
         # Write metadata to audio file
         metadata_song_id = track + self.start - 1
         audio['title'] = [metadata.songs[metadata_song_id].name]  # Song Title
-        audio['artist'] = [force_trans(metadata.songs[metadata_song_id].artist)]  # Song Artist
+        audio['artist'] = force_trans(metadata.songs[metadata_song_id].artist).split(';')  # Song Artist
         audio['album'] = [metadata.title]  # Album Title
-        audio['albumartist'] = [metadata.album_artist]  # Album Artist
+        audio['albumartist'] = metadata.album_artist.split(';')  # Album Artist
         audio['date'] = [str(metadata.release_date.year)]  # Album Year
         audio.save()
 
@@ -127,8 +127,12 @@ class Tagger:
         if self.rename:
             new_name = "{:02d} {}.flac".format(track, metadata.songs[metadata_song_id].name)
             new_name = new_name.replace(": ", "：")
+            new_name = new_name.replace(":", "：")
             new_name = new_name.replace(" / ", "／")
             new_name = new_name.replace("/ ", "／")
+            new_name = new_name.replace("/", "／")
+            new_name = new_name.replace("\"", "")
+            new_name = new_name.replace("?", "？")
             rename(file_path, new_name)
 
     def tag_file(self, file_path: str, metadata: AlbumMetadata):
