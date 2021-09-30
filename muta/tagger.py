@@ -16,14 +16,18 @@ class MatchingMethod(Enum):
 
 def force_trans(string):
     string = string.replace("祖堅 正慶", "祖堅正慶")
+    string = string.replace("植松 伸夫", "植松伸夫")
+    string = string.replace("今村 貴文", "今村貴文")
+    string = string.replace("石川 大樹", "石川大樹")
     return string
 
 
 class Tagger:
-    def __init__(self, matching_method: MatchingMethod, auto_rename=False, start=1):
+    def __init__(self, matching_method: MatchingMethod, auto_rename=False, start=1, offset=0):
         self.matching_method = matching_method
         self.rename = auto_rename
         self.start = start
+        self.offset = offset
 
     @staticmethod
     def __guess_track_id_by_length(song_length: float, metadata: AlbumMetadata) -> int:
@@ -56,7 +60,7 @@ class Tagger:
             for song_id in metadata.songs:
                 if file_name == metadata.songs[song_id].name:
                     track = song_id
-                    audio.tags['trkn'] = [(str(song_id) , str(len(metadata.songs)))]
+                    audio.tags['trkn'] = [(str(song_id), str(len(metadata.songs)))]
                     break
             if track == 0:
                 raise ValueError
@@ -91,9 +95,10 @@ class Tagger:
                 raise ValueError
             else:
                 track = int(audio['tracknumber'][0].split('/')[0])
+                audio['tracknumber'] = [str(track - self.offset)]
         elif self.matching_method == MatchingMethod.TrackInName:
             track = int(file_path[0:2].strip('.')) - self.start + 1
-            audio['tracknumber'] = [str(track)]
+            audio['tracknumber'] = [str(track - self.offset)]
         elif self.matching_method == MatchingMethod.Name:
             file_names = file_path.split(" ")
 
@@ -107,7 +112,7 @@ class Tagger:
             for song_id in metadata.songs:
                 if file_name in metadata.songs[song_id].name:
                     track = song_id - self.start + 1
-                    audio['tracknumber'] = [str(track)]
+                    audio['tracknumber'] = [str(track - self.offset)]
                     break
             if track == 0:
                 raise ValueError
@@ -125,7 +130,7 @@ class Tagger:
 
         # rename
         if self.rename:
-            new_name = "{:02d} {}.flac".format(track, metadata.songs[metadata_song_id].name)
+            new_name = "{:02d} {}.flac".format(track - self.offset, metadata.songs[metadata_song_id].name)
             new_name = new_name.replace(": ", "：")
             new_name = new_name.replace(":", "：")
             new_name = new_name.replace(" / ", "／")
@@ -133,6 +138,8 @@ class Tagger:
             new_name = new_name.replace("/", "／")
             new_name = new_name.replace("\"", "")
             new_name = new_name.replace("?", "？")
+            new_name = new_name.replace("<", "＜")
+            new_name = new_name.replace(">", "＞")
             rename(file_path, new_name)
 
     def tag_file(self, file_path: str, metadata: AlbumMetadata):
