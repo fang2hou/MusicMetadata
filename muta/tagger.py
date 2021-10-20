@@ -73,7 +73,8 @@ class Tagger:
         audio[u'\xa9ART'] = [force_trans(metadata.songs[metadata_song_id].artist)]  # Song Artist
         audio[u'\xa9alb'] = [metadata.title]  # Album Title
         audio['aART'] = [metadata.album_artist]  # Album Artist
-        audio[u'\xa9day'] = [str(metadata.release_date.year)]  # Album Year
+        audio[u'\xa9day'] = ["{}-{:02d}-{:02d}".format(metadata.release_date.year, metadata.release_date.month,
+                                                       metadata.release_date.day)]  # Album Year
         audio.save()
 
         # rename
@@ -125,7 +126,8 @@ class Tagger:
         audio['artist'] = force_trans(metadata.songs[metadata_song_id].artist).split(';')  # Song Artist
         audio['album'] = [metadata.title]  # Album Title
         audio['albumartist'] = metadata.album_artist.split(';')  # Album Artist
-        audio['date'] = [str(metadata.release_date.year)]  # Album Year
+        audio['date'] = ["{}-{:02d}-{:02d}".format(metadata.release_date.year, metadata.release_date.month,
+                                                   metadata.release_date.day)]  # Album Year
         audio.save()
 
         # rename
