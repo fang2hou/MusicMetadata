@@ -59,7 +59,13 @@ class AppleMusicParser(Parser):
         # Album
         album.title = soup.select("h1.product-name")[0].text.strip()
         album.album_artist = self.get_artists_string(soup.select("div.product-creator")[0])
-        album.release_date = datetime.strptime(soup.select("p.song-released-container")[0].text.strip(), "%B %d, %Y")
+        _release_date = soup.select("p.song-released-container")[0].text.strip()
+        if "年" in _release_date:
+            album.release_date = datetime.strptime(_release_date, "%Y年%m月%d日")
+        elif "년" in _release_date:
+            album.release_date = datetime.strptime(_release_date, "%Y년 %m월 %d일")
+        else:
+            album.release_date = datetime.strptime(_release_date, "%B %d, %Y")
 
         # Songs
         table_body = soup.select("div.songs-list")[0]
